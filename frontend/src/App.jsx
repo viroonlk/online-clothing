@@ -8,10 +8,13 @@ import SellerDashboard from './pages/seller/SellerDashboard';
 import AddProduct from './pages/seller/AddProduct';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import ProtectedRoute from './routes/ProtectedRoute';
+import ProductDetail from './pages/ProductDetail';
+import { CartProvider } from './context/CartContext';
 
 function App() {
   return (
     <AuthProvider>
+      <CartProvider>
       {/* วาง Navbar ไว้นอก Routes เพื่อให้แสดงในทุกหน้า */}
       <Navbar /> 
       
@@ -20,6 +23,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/product/:id" element={<ProductDetail />} />
 
         {/* 2. Seller Routes (ใช้ ProtectedRoute คุมสิทธิ์) */}
         <Route 
@@ -49,6 +53,7 @@ function App() {
           } 
         />
       </Routes>
+      </CartProvider>
     </AuthProvider>
   );
 }

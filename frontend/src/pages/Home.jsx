@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
+import { Link } from 'react-router-dom'; // 🔥 เพิ่ม Link เข้ามาตรงนี้
 
 const Home = () => {
     const [products, setProducts] = useState([]);
@@ -8,7 +9,7 @@ const Home = () => {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                // เรียก API ดึงสินค้าทั้งหมด (ตัวที่เราเพิ่งแก้ Route ให้เป็น Public)
+                // เรียก API ดึงสินค้าทั้งหมด
                 const res = await api.get('/products'); 
                 setProducts(res.data);
             } catch (error) {
@@ -36,13 +37,18 @@ const Home = () => {
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                     {products.map((product) => (
-                        <div key={product.id} className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden border border-gray-100 flex flex-col">
-                            {/* กรอบรูปจัตุรัสแบบสมส่วนที่เคยตั้งค่าไว้ */}
-                            <div className="aspect-square bg-gray-50 flex items-center justify-center p-2">
+                        /* 🔥 หุ้มทั้งการ์ดด้วย Link เพื่อให้คลิกตรงไหนก็ได้เพื่อดูรายละเอียด */
+                        <Link 
+                            key={product.id} 
+                            to={`/product/${product.id}`} 
+                            className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-100 flex flex-col group"
+                        >
+                            {/* กรอบรูปจัตุรัสแบบสมส่วน */}
+                            <div className="aspect-square bg-gray-50 flex items-center justify-center p-2 overflow-hidden">
                                 <img 
                                     src={product.image_url || "https://via.placeholder.com/150"} 
                                     alt={product.name} 
-                                    className="max-w-full max-h-full object-contain"
+                                    className="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-300"
                                 />
                             </div>
                             
@@ -53,18 +59,19 @@ const Home = () => {
                                 <p className="text-xs text-gray-400 mb-2 uppercase tracking-wider">
                                     ร้าน: {product.shop_name}
                                 </p>
-                                <p className="text-sm text-gray-500 line-clamp-2 mb-4 h-10">
+                                <p className="text-sm text-gray-500 line-clamp-2 mb-4 h-10 italic">
                                     {product.description}
                                 </p>
                                 
                                 <div className="mt-auto flex justify-between items-center">
                                     <span className="text-orange-600 font-bold text-xl">฿{product.price}</span>
-                                    <button className="bg-orange-500 text-white text-sm px-3 py-1.5 rounded-lg hover:bg-orange-600 transition-colors">
+                                    {/* เปลี่ยนจาก button เป็น span หรือ div เพราะซ้อน Link ไม่ได้ แต่ให้หน้าตาเหมือนเดิม */}
+                                    <span className="bg-orange-500 text-white text-sm px-3 py-1.5 rounded-lg group-hover:bg-orange-600 transition-colors">
                                         ดูรายละเอียด
-                                    </button>
+                                    </span>
                                 </div>
                             </div>
-                        </div>
+                        </Link>
                     ))}
                 </div>
             )}

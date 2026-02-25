@@ -65,7 +65,7 @@ exports.deleteProduct = async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: 'Server Error' });
     }
-}; // <--- ปิดปีกกาตรงนี้ให้เรียบร้อย
+};
 
 // 4. ดึงสินค้าทั้งหมด (หน้า Home)
 exports.getAllProducts = async (req, res) => {
@@ -78,6 +78,27 @@ exports.getAllProducts = async (req, res) => {
         `;
         const [products] = await db.query(sql);
         res.json(products);
+    } catch (error) {
+        res.status(500).json({ message: 'Server Error', error: error.message });
+    }
+}; // <--- คุณลืมใส่ตัวนี้ในโค้ดที่ส่งมาครับ
+
+// 5. ดึงข้อมูลสินค้าชิ้นเดียวตาม ID
+exports.getProductById = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const sql = `
+            SELECT p.*, s.shop_name 
+            FROM products p
+            JOIN shops s ON p.shop_id = s.id
+            WHERE p.id = ?
+        `;
+        const [product] = await db.query(sql, [id]);
+        
+        if (product.length === 0) {
+            return res.status(404).json({ message: 'ไม่พบสินค้า' });
+        }
+        res.json(product[0]);
     } catch (error) {
         res.status(500).json({ message: 'Server Error', error: error.message });
     }

@@ -3,6 +3,8 @@ const router = express.Router();
 const productController = require('../controllers/productController');
 const { authenticateToken } = require('../middleware/authMiddleware');
 
+
+router.get('/:id', productController.getProductById);
 // 1. ดูสินค้าทั้งหมด (Public) - วางไว้บนสุดเพื่อให้ใครก็เข้าถึงได้
 // เส้นทางนี้จะใช้สำหรับหน้า Home เพื่อดึงสินค้าจากทุกร้านมาโชว์
 router.get('/', productController.getAllProducts); 

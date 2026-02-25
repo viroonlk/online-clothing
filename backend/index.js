@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const db = require('./config/db');
 const authRoutes = require('./routes/authRoutes'); // <--- 1. เพิ่มบรรทัดนี้
 const shopRoutes = require('./routes/shopRoutes');
+const productRoutes = require('./routes/productRoutes');
 dotenv.config();
 
 const app = express();
@@ -13,8 +14,9 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-app.use('/api/auth', authRoutes); // <--- 2. เพิ่มบรรทัดนี้ (บอกว่าถ้าขึ้นต้นด้วย /api/auth ให้ไปดูที่ authRoutes)
-app.use('/api/shops', shopRoutes); // <--- เพิ่ม
+app.use('/api/auth', authRoutes);
+app.use('/api/shops', shopRoutes);
+app.use('/api/products', productRoutes);
 // ... (โค้ด Test Route เดิมปล่อยไว้ได้ หรือจะลบก็ได้) ...
 
 app.listen(port, () => {

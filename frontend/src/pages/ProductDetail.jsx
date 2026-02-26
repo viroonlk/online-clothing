@@ -1,12 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react'; // 🔥 1. เพิ่ม useContext
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
+import { CartContext } from '../context/CartContext'; // 🔥 2. Import CartContext
 
 const ProductDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
+
+    // 🔥 3. ดึงฟังก์ชัน addToCart มาจาก Context
+    const { addToCart } = useContext(CartContext);
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -47,15 +51,19 @@ const ProductDetail = () => {
                     <h1 className="text-4xl font-bold text-gray-800 mb-4">{product.name}</h1>
                     <p className="text-3xl font-bold text-orange-600 mb-6">฿{product.price.toLocaleString()}</p>
                     
-                    <div className="bg-gray-50 p-4 rounded-xl mb-6">
+                    <div className="bg-gray-50 p-4 rounded-xl mb-6 flex-grow">
                         <h3 className="font-bold text-gray-700 mb-2">รายละเอียดสินค้า</h3>
                         <p className="text-gray-600 leading-relaxed whitespace-pre-line">{product.description}</p>
                     </div>
 
-                    <div className="mt-auto">
+                    <div className="mt-auto pt-4">
                         <p className="text-sm text-gray-400 mb-4">คงเหลือในสต็อก: {product.stock_qty} ชิ้น</p>
                         <div className="flex gap-4">
-                            <button className="flex-1 bg-orange-500 text-white py-4 rounded-xl font-bold text-lg hover:bg-orange-600 transition shadow-lg shadow-orange-200">
+                            {/* 🔥 4. ใส่เหตุการณ์ onClick ให้เรียกฟังก์ชัน addToCart */}
+                            <button 
+                                onClick={() => addToCart(product)} 
+                                className="flex-1 bg-orange-500 text-white py-4 rounded-xl font-bold text-lg hover:bg-orange-600 transition shadow-lg shadow-orange-200"
+                            >
                                 เพิ่มลงตะกร้า
                             </button>
                             <button className="bg-orange-50 text-orange-600 px-6 py-4 rounded-xl font-bold hover:bg-orange-100 transition">

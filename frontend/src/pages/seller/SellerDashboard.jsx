@@ -1,149 +1,133 @@
-import { useEffect, useState, useContext } from 'react';
-import AuthContext from '../../context/AuthContext';
+import { useEffect, useState } from 'react';
 import api from '../../api/axios';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const SellerDashboard = () => {
-    const { user, logout } = useContext(AuthContext);
-    const navigate = useNavigate();
-    
-    const [shop, setShop] = useState(null);
-    const [products, setProducts] = useState([]); 
+    const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
-    
-    const [formData, setFormData] = useState({ shop_name: '', description: '' });
+
+    // ฟังก์ชันดึงออเดอร์ของร้าน
+    const fetchOrders = async () => {
+        try {
+            const res = await api.get('/orders/seller-orders');
+            setOrders(res.data);
+        } catch (error) {
+            console.error("Error fetching seller orders", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const shopRes = await api.get('/shops/me');
-                setShop(shopRes.data);
-
-                if (shopRes.data) {
-                    const productRes = await api.get('/products/my-products');
-                    setProducts(productRes.data);
-                }
-            } catch (error) {
-                console.log("ยังไม่มีร้านค้า หรือเกิดข้อผิดพลาด");
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchData();
+        fetchOrders();
     }, []);
 
-    const handleCreateShop = async (e) => {
-        e.preventDefault();
+    // ฟังก์ชันอัปเดตสถานะ
+    const handleStatusChange = async (orderId, newStatus) => {
         try {
-            await api.post('/shops', formData);
-            alert('สร้างร้านค้าสำเร็จ!');
-            window.location.reload();
+            await api.put(`/orders/${orderId}/status`, { status: newStatus });
+            alert('✅ อัปเดตสถานะเรียบร้อยแล้ว!');
+            fetchOrders(); // รีเฟรชข้อมูลใหม่หลังจากอัปเดตเสร็จ
         } catch (error) {
-            alert('เกิดข้อผิดพลาด');
+            console.error("Error updating status", error);
+            alert('❌ เกิดข้อผิดพลาดในการอัปเดตสถานะ');
         }
     };
 
-    const handleDeleteProduct = async (id) => {
-        if (!window.confirm("คุณแน่ใจไหมว่าจะลบสินค้านี้?")) return;
-        
-        try {
-            await api.delete(`/products/${id}`);
-            setProducts(products.filter(p => p.id !== id));
-            alert("ลบสินค้าเรียบร้อย");
-        } catch (error) {
-            alert("ลบไม่สำเร็จ");
-        }
-    };
-
-    if (loading) return <div className="p-10 text-center">Loading...</div>;
+    if (loading) return <div className="p-10 text-center text-xl font-bold">กำลังโหลดข้อมูลคำสั่งซื้อ...</div>;
 
     return (
-        <div className="p-10 bg-gray-50 min-h-screen">
+        <div className="container mx-auto p-8 max-w-6xl">
             <div className="flex justify-between items-center mb-8">
-                <h1 className="text-3xl font-bold text-gray-800">Seller Dashboard</h1>
-                <button onClick={logout} className="bg-red-500 text-white px-4 py-2 rounded shadow hover:bg-red-600">Logout</button>
+                <h1 className="text-3xl font-bold text-gray-800">🏪 จัดการคำสั่งซื้อ (Seller Dashboard)</h1>
+                <Link to="/seller/add-product" className="bg-orange-500 text-white px-6 py-2 rounded-lg font-bold hover:bg-orange-600 transition shadow-md">
+                    + เพิ่มสินค้าใหม่
+                </Link>
             </div>
-
-            {shop ? (
-                <div>
-                    <div className="bg-white p-6 rounded shadow mb-6 border-l-4 border-green-500">
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <h2 className="text-2xl font-bold text-green-700">🏪 {shop.shop_name}</h2>
-                                <p className="text-gray-600">{shop.description}</p>
-                            </div>
-                            <button 
-                                onClick={() => navigate('/seller/add-product')}
-                                className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 flex items-center gap-2"
-                            >
-                                + เพิ่มสินค้าใหม่
-                            </button>
-                        </div>
-                    </div>
-
-                    <h3 className="text-xl font-bold mb-4">📦 รายการสินค้าของคุณ ({products.length})</h3>
-                    
-                    {products.length === 0 ? (
-                        <p className="text-gray-500 text-center py-10">ยังไม่มีสินค้า.. ลองกดเพิ่มดูสิ!</p>
-                    ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            {products.map((product) => (
-                                <div key={product.id} className="bg-white rounded shadow hover:shadow-lg transition p-0 overflow-hidden border">
-                                    {/* 🔥🔥🔥 แก้ตรงนี้: ใช้ object-contain 🔥🔥🔥 */}
-                                    <img 
-                                        src={product.image_url || "https://via.placeholder.com/150"} 
-                                        alt={product.name} 
-                                        className="w-full aspect-square object-contain bg-gray-100 border-b"
-                                    />
-                                    <div className="p-4">
-                                        <h4 className="font-bold text-lg">{product.name}</h4>
-                                        <p className="text-gray-500 text-sm h-10 overflow-hidden">{product.description}</p>
-                                        <div className="flex justify-between items-center mt-4">
-                                            <span className="text-green-600 font-bold text-xl">฿{product.price}</span>
-                                            <span className="text-gray-400 text-sm">สต็อก: {product.stock_qty}</span>
-                                        </div>
-                                        <button 
-                                            onClick={() => handleDeleteProduct(product.id)}
-                                            className="w-full mt-4 bg-red-100 text-red-600 py-2 rounded hover:bg-red-200"
-                                        >
-                                            ลบสินค้า
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
+            
+            {orders.length === 0 ? (
+                <div className="bg-white p-10 rounded-2xl shadow-sm border text-center">
+                    <h2 className="text-2xl font-bold text-gray-700 mb-2">ยังไม่มีคำสั่งซื้อเข้ามา 😢</h2>
+                    <p className="text-gray-500">โปรโมทร้านค้าของคุณเพิ่มเติมเพื่อให้ลูกค้าเห็นสินค้ามากขึ้นนะ!</p>
                 </div>
             ) : (
-                <div className="bg-white p-8 rounded shadow max-w-lg mx-auto border-t-4 border-orange-500">
-                    <h2 className="text-2xl font-bold mb-4 text-center">🚀 เริ่มต้นเปิดร้านค้าของคุณ</h2>
-                    <form onSubmit={handleCreateShop}>
-                        <div className="mb-4">
-                            <label className="block text-gray-700 mb-2">ชื่อร้านค้า</label>
-                            <input 
-                                type="text" 
-                                className="w-full border p-2 rounded" 
-                                value={formData.shop_name}
-                                onChange={(e) => setFormData({...formData, shop_name: e.target.value})}
-                                required
-                            />
+                <div className="grid gap-6">
+                    {orders.map(order => (
+                        <div key={order.order_id} className="bg-white border-2 rounded-2xl shadow-sm overflow-hidden">
+                            {/* ส่วนหัวของออเดอร์ */}
+                            <div className="bg-gray-50 border-b p-5 flex flex-wrap justify-between items-center gap-4">
+                                <div>
+                                    <p className="text-sm text-gray-500 font-medium">หมายเลขคำสั่งซื้อ</p>
+                                    <p className="font-bold text-lg text-gray-800">#{order.order_id}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-500 font-medium">วันที่สั่งซื้อ</p>
+                                    <p className="font-medium text-gray-700">
+                                        {new Date(order.order_date).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-500 font-medium mb-1">ยอดรวมทั้งสิ้น</p>
+                                    <p className="font-bold text-xl text-orange-600">฿{Number(order.total_amount).toLocaleString()}</p>
+                                </div>
+                                
+                                {/* 🔥 Dropdown สำหรับเปลี่ยนสถานะ */}
+                                <div className="bg-white p-2 rounded-lg border shadow-sm">
+                                    <label className="text-xs text-gray-500 font-bold block mb-1">ปรับสถานะออเดอร์:</label>
+                                    <select 
+                                        value={order.status}
+                                        onChange={(e) => handleStatusChange(order.order_id, e.target.value)}
+                                        className="bg-gray-50 border text-gray-800 font-bold rounded p-2 outline-none focus:ring-2 focus:ring-orange-500"
+                                    >
+                                        <option value="pending">รอชำระเงิน</option>
+                                        <option value="paid">ชำระเงินแล้ว</option>
+                                        <option value="shipped">จัดส่งแล้ว</option>
+                                        <option value="cancelled">ยกเลิกออเดอร์</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            {/* ส่วนข้อมูลลูกค้าและสินค้า */}
+                            <div className="p-5 flex flex-col md:flex-row gap-8">
+                                {/* ฝั่งซ้าย: ข้อมูลการจัดส่ง */}
+                                <div className="md:w-1/3 border-r pr-6">
+                                    <h3 className="font-bold text-gray-700 mb-3 border-b pb-2">📍 ข้อมูลการจัดส่ง</h3>
+                                    <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">
+                                        {order.shipping_address}
+                                    </p>
+                                </div>
+
+                                {/* ฝั่งขวา: รายการสินค้า */}
+                                <div className="md:w-2/3">
+                                    <h3 className="font-bold text-gray-700 mb-3 border-b pb-2">📦 รายการสินค้า ({order.items.length} รายการ)</h3>
+                                    <div className="flex flex-col gap-3">
+                                        {order.items.map(item => (
+                                            <div key={item.order_item_id} className="flex justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-100">
+                                                <div className="flex items-center gap-4">
+                                                    <img 
+                                                        src={item.image_url || "https://via.placeholder.com/60"} 
+                                                        alt={item.name} 
+                                                        className="w-12 h-12 object-contain bg-white rounded border p-1"
+                                                    />
+                                                    <div>
+                                                        <p className="font-bold text-gray-800 text-sm">{item.name}</p>
+                                                        <p className="text-xs text-gray-500">จำนวน: {item.quantity} ชิ้น</p>
+                                                    </div>
+                                                </div>
+                                                <div className="font-bold text-gray-700 text-sm">
+                                                    ฿{(item.price_at_purchase * item.quantity).toLocaleString()}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div className="mb-4">
-                            <label className="block text-gray-700 mb-2">รายละเอียดร้าน</label>
-                            <textarea 
-                                className="w-full border p-2 rounded"
-                                rows="3"
-                                value={formData.description}
-                                onChange={(e) => setFormData({...formData, description: e.target.value})}
-                            ></textarea>
-                        </div>
-                        <button type="submit" className="w-full bg-orange-500 text-white p-3 rounded font-bold hover:bg-orange-600">
-                            ยืนยันการเปิดร้าน
-                        </button>
-                    </form>
+                    ))}
                 </div>
             )}
         </div>
     );
 };
+
 export default SellerDashboard;

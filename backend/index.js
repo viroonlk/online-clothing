@@ -8,6 +8,7 @@ const productRoutes = require('./routes/productRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const path = require('path');
 const adminRoutes = require('./routes/adminRoutes'); // 🔥 เพิ่มบรรทัดนี้
+const cors = require('cors');
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ app.use('/api/orders', orderRoutes);
 // ... (โค้ด Test Route เดิมปล่อยไว้ได้ หรือจะลบก็ได้) ...
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/admin', adminRoutes); // 🔥 เพิ่มบรรทัดนี้ เพื่อให้เข้าถึงผ่าน /api/admin ได้
+app.use(cors());
 
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);

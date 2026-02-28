@@ -125,9 +125,10 @@ exports.updateOrderStatus = async (req, res) => {
     const { status } = req.body;
 
     try {
+        // 🔥 เปลี่ยนตรงนี้ เอา OR order_id = ? ออกไปเลยครับ
         await db.query(
-            'UPDATE orders SET status = ? WHERE order_id = ? OR id = ?',
-            [status, id, id]
+            'UPDATE orders SET status = ? WHERE id = ?',
+            [status, id]
         );
         res.json({ message: 'อัปเดตสถานะเรียบร้อย!' });
     } catch (error) {

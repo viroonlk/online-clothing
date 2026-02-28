@@ -24,11 +24,10 @@ const Navbar = () => {
                 <div className="flex items-center gap-6 font-medium">
                     <Link to="/" className="text-gray-600 hover:text-orange-500 transition">หน้าแรก</Link>
 
-                    {/* 🔥 3. เพิ่มปุ่มตะกร้าสินค้าตรงนี้ (แสดงให้ทุกคนเห็น) */}
+                    {/* ตะกร้าสินค้า */}
                     <Link to="/cart" className="relative flex items-center gap-1 text-gray-600 hover:text-orange-500 transition">
                         <span className="text-xl">🛍️</span>
                         <span>ตะกร้า</span>
-                        {/* ตัวเลขแจ้งเตือนจำนวนของในตะกร้า */}
                         {cartItems.length > 0 && (
                             <span className="absolute -top-2 -right-3 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
                                 {cartItems.length}
@@ -37,7 +36,7 @@ const Navbar = () => {
                     </Link>
 
                     {user ? (
-                        /* กรณีล็อกอินแล้ว */
+                        /* กรณีล็อกอินแล้ว (ใส่ทุกปุ่มไว้ใน div นี้) */
                         <div className="flex items-center gap-4">
                             <div className="flex flex-col items-end">
                                 <span className="text-sm text-gray-400">สวัสดี,</span>
@@ -50,7 +49,7 @@ const Navbar = () => {
                                 </Link>
                             </div>
 
-                            {/* ปุ่มเมนูตาม Role */}
+                            {/* โชว์ปุ่มจัดการร้านค้า เฉพาะ Seller */}
                             {user.role === 'seller' && (
                                 <Link
                                     to="/seller/dashboard"
@@ -60,12 +59,13 @@ const Navbar = () => {
                                 </Link>
                             )}
 
+                            {/* โชว์ปุ่มจัดการระบบ เฉพาะ Admin */}
                             {user.role === 'admin' && (
                                 <Link
                                     to="/admin/dashboard"
-                                    className="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg hover:bg-blue-200 transition"
+                                    className="bg-red-500 text-white px-4 py-2 rounded-lg font-bold hover:bg-red-600 transition shadow-sm flex items-center gap-2"
                                 >
-                                    แอดมิน
+                                    <span>🛡️</span> จัดการระบบ (Admin)
                                 </Link>
                             )}
 

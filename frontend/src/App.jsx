@@ -1,18 +1,22 @@
 import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import Navbar from './components/Navbar'; // เพิ่ม Navbar เข้าไป
-import Home from './pages/Home'; // ดึงหน้า Home จริงๆ มาใช้
+import { CartProvider } from './context/CartContext';
+
+// --- Components & Routes ---
+import Navbar from './components/Navbar';
+import ProtectedRoute from './routes/ProtectedRoute';
+
+// --- Pages ---
+import Home from './pages/Home';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
-import SellerDashboard from './pages/seller/SellerDashboard';
-import AddProduct from './pages/seller/AddProduct';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import ProtectedRoute from './routes/ProtectedRoute';
 import ProductDetail from './pages/ProductDetail';
-import { CartProvider } from './context/CartContext';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import MyOrders from './pages/MyOrders';
+import SellerDashboard from './pages/seller/SellerDashboard';
+import AddProduct from './pages/seller/AddProduct';
+import AdminDashboard from './pages/admin/AdminDashboard';
 
 function App() {
   return (
@@ -22,20 +26,18 @@ function App() {
         <Navbar />
 
         <Routes>
-          <Route
-            path="/my-orders"
-            element={
-              <ProtectedRoute allowedRoles={['customer', 'seller', 'admin']}>
-                <MyOrders />
-              </ProtectedRoute>
-            }
-          />
-          {/* 1. Public Routes */}
+          {/* ========================================== */}
+          {/* 🔓 1. Public Routes (ใครก็เข้าได้) */}
+          {/* ========================================== */}
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/product/:id" element={<ProductDetail />} />
-          <Route path="/cart" element={<Cart />} /> {/* <--- เช็คว่ามีบรรทัดนี้หรือยัง */}
+          <Route path="/cart" element={<Cart />} /> 
+
+          {/* ========================================== */}
+          {/* 🔐 2. Customer Routes (ต้อง Login) */}
+          {/* ========================================== */}
           <Route
             path="/checkout"
             element={
@@ -44,12 +46,22 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/my-orders"
+            element={
+              <ProtectedRoute allowedRoles={['customer', 'seller', 'admin']}>
+                <MyOrders />
+              </ProtectedRoute>
+            }
+          />
 
-          {/* 2. Seller Routes (ใช้ ProtectedRoute คุมสิทธิ์) */}
+          {/* ========================================== */}
+          {/* 🏪 3. Seller Routes (เฉพาะคนขายและแอดมิน) */}
+          {/* ========================================== */}
           <Route
             path="/seller/dashboard"
             element={
-              <ProtectedRoute allowedRoles={['seller']}>
+              <ProtectedRoute allowedRoles={['seller', 'admin']}>
                 <SellerDashboard />
               </ProtectedRoute>
             }
@@ -57,13 +69,15 @@ function App() {
           <Route
             path="/seller/add-product"
             element={
-              <ProtectedRoute allowedRoles={['seller']}>
+              <ProtectedRoute allowedRoles={['seller', 'admin']}>
                 <AddProduct />
               </ProtectedRoute>
             }
           />
 
-          {/* 3. Admin Routes */}
+          {/* ========================================== */}
+          {/* 🛡️ 4. Admin Routes (เฉพาะแอดมินเท่านั้น) */}
+          {/* ========================================== */}
           <Route
             path="/admin/dashboard"
             element={
@@ -76,7 +90,6 @@ function App() {
       </CartProvider>
     </AuthProvider>
   );
-
 }
 
 export default App;

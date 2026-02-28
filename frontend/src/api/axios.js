@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'https://online-clothing-bnij.onrender.com/', // ชี้ไปที่ Backend ของเรา
+    baseURL: 'https://online-clothing-bnij.onrender.com/api', // ชี้ไปที่ Backend ของเรา
     headers: {
         'Content-Type': 'application/json',
     },
